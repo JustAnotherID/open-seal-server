@@ -1,0 +1,7 @@
+/target
+
+.idea
+!/.idea/**/Project.xml
+.vscode
+!.vscode/extensions.json
+!.vscode/settings.json
