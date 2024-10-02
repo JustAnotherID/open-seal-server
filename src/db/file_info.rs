@@ -1,14 +1,17 @@
-use anyhow::Error;
+use anyhow::{anyhow, Error};
+use base64::{prelude::BASE64_STANDARD, Engine};
 use entity::entities::{
     file_info::{self, Model},
     prelude::FileInfo,
 };
 use file_info::{ActiveModel, Column};
+use flate2::write::ZlibEncoder;
 use nid::{alphabet::Base36LowercaseAlphabet, Nanoid};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
     PaginatorTrait, QueryFilter,
 };
+use std::io::Write;
 
 const KEY_SECRET_LENGTH: usize = 6;
 
@@ -63,6 +66,39 @@ pub async fn save_file_info(
         model.insert(db).await?;
         Ok((key, secret))
     }
+}
+
+#[derive(serde::Serialize)]
+pub struct FileInfoDTO {
+    pub name: String,
+    pub data: String,
+    pub created_at: String,
+    pub updated_at: Option<String>,
+}
+
+pub async fn find_file_info(
+    db: &DatabaseConnection,
+    key: &str,
+    secret: &str,
+) -> Result<FileInfoDTO, Error> {
+    let model = FileInfo::find()
+        .filter(Column::Key.eq(key))
+        .filter(Column::Secret.eq(secret))
+        .one(db)
+        .await
+        .expect("log data not found");
+    if let Some(model) = model {
+        let mut encoder = ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+        encoder.write_all(&model.content)?;
+        let data = encoder.finish()?;
+        return Ok(FileInfoDTO {
+            name: model.name,
+            data: BASE64_STANDARD.encode(data),
+            created_at: model.created_at.to_string(),
+            updated_at: model.updated_at.map(|v| v.to_string()),
+        });
+    }
+    Err(anyhow!("log data not found"))
 }
 
 #[cfg(test)]

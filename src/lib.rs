@@ -1,8 +1,8 @@
-use crate::db::conn::establish_conn;
 use crate::{
     api::base::{health, root},
     api::download::download,
     api::upload::upload,
+    db::conn::establish_conn,
 };
 use anyhow::Error;
 use axum::{

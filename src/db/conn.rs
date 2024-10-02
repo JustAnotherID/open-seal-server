@@ -1,4 +1,5 @@
 use anyhow::Error;
+use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::time::Duration;
 use tracing::log;
@@ -9,6 +10,9 @@ pub async fn establish_conn() -> Result<DatabaseConnection, Error> {
     let db = Database::connect(opt)
         .await
         .expect("can't connect to database");
+    Migrator::up(&db, None)
+        .await
+        .expect("database migration failed");
     Ok(db)
 }
 

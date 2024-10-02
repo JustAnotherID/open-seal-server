@@ -1,8 +1,11 @@
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
 pub enum ApiError {
     Internal(anyhow::Error),
+    Param(anyhow::Error),
 }
 
 impl IntoResponse for ApiError {
@@ -11,6 +14,7 @@ impl IntoResponse for ApiError {
             ApiError::Internal(err) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, format!("{}", err)).into_response()
             }
+            ApiError::Param(err) => (StatusCode::BAD_REQUEST, format!("{}", err)).into_response(),
         }
     }
 }
