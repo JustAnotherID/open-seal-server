@@ -1,36 +1,69 @@
-use crate::error::ApiError;
-use axum::extract::Multipart;
-use axum::Json;
-use std::collections::HashMap;
-use std::str::from_utf8;
+use crate::{db::file_info::save_file_info, error::ApiError};
+use anyhow::Error;
+use axum::{
+    extract::{Multipart, State},
+    Json,
+};
+use flate2::bufread::ZlibDecoder;
+use sea_orm::DatabaseConnection;
+use std::{collections::HashMap, io::Read, str::from_utf8, string::String};
 
-pub async fn upload(mut multipart: Multipart) -> Result<Json<HashMap<String, String>>, ApiError> {
-    let mut _name: String = "".to_string();
-    let mut _uniform_id = "".to_string();
-    let mut url: String = "".to_string();
-    while let Ok(field) = multipart.next_field().await {
-        if let Some(field) = field {
-            match field.name() {
-                Some("name") => {
-                    let b = field.bytes().await?;
-                    _name = from_utf8(b.to_vec().as_slice())?.to_string();
-                }
-                Some("uniform_id") => {
-                    let b = field.bytes().await?;
-                    _uniform_id = from_utf8(b.to_vec().as_slice())?.to_string();
-                }
-                // Some("client") => {}
-                // Some("version") => {}
-                Some("file") => {
-                    let _filename = field.file_name().unwrap();
-                    let _data = field.bytes().await?;
-                    // tokio::fs::write(&filename, &data).await?;
-                    url = "http://localhost:3000?key=1024#114514".to_string();
-                }
-                None | _ => {}
+pub async fn upload(
+    State(db): State<DatabaseConnection>,
+    mut multipart: Multipart,
+) -> Result<Json<HashMap<String, String>>, ApiError> {
+    let mut name = "".to_string();
+    let mut uniform_id = "".to_string();
+    let mut _client = "".to_string();
+    let mut _version = "".to_string();
+    let mut url = "".to_string();
+    while let Some(field) = multipart.next_field().await? {
+        match field.name() {
+            Some("name") => {
+                let b = field.bytes().await?;
+                name = from_utf8(b.to_vec().as_slice())?.to_string();
             }
+            Some("uniform_id") => {
+                let b = field.bytes().await?;
+                uniform_id = from_utf8(b.to_vec().as_slice())?.to_string();
+            }
+            Some("client") => {
+                let b = field.bytes().await?;
+                _client = from_utf8(b.to_vec().as_slice())?.to_string();
+            }
+            Some("version") => {
+                let b = field.bytes().await?;
+                _version = from_utf8(b.to_vec().as_slice())?.to_string();
+            }
+            Some("file") => {
+                let _ = field.file_name().unwrap();
+                let data = field.bytes().await?;
+
+                url = write_log_file(&db, &name, &uniform_id, &data)
+                    .await
+                    .map_or(String::new(), |(key, secret)| {
+                        format!("http://localhost:3000?key={}#{}", key, secret)
+                    });
+            }
+            _ => break,
         }
     }
     let res: HashMap<String, String> = [("url".to_string(), url)].iter().cloned().collect();
     Ok(Json(res))
+}
+
+async fn write_log_file(
+    db: &DatabaseConnection,
+    name: &str,
+    uniform_id: &str,
+    compressed_data: &[u8],
+) -> Result<(String, String), Error> {
+    let mut zlib = ZlibDecoder::new(compressed_data);
+    let mut buf = Vec::new();
+    zlib.read_to_end(&mut buf).expect("zlib decode failed");
+    let (key, secret) = save_file_info(db, name, uniform_id, buf)
+        .await
+        .expect("save file info failed");
+
+    Ok((key, secret))
 }
