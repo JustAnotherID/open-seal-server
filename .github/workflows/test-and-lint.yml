@@ -1,0 +1,30 @@
+name: Test And Lint
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cargo check
+        run: cargo check
+
+      - name: Clippy
+        uses: auguwu/clippy-action@1.4.0
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
+
+      - name: Cargo test
+        run: cargo test --all-features
