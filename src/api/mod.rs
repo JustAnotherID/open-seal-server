@@ -2,8 +2,9 @@ use crate::config::Config;
 use axum::extract::FromRef;
 use sea_orm::DatabaseConnection;
 
-pub(crate) mod base;
 pub(crate) mod download;
+pub(crate) mod health;
+pub(crate) mod root;
 pub(crate) mod upload;
 
 #[derive(Clone)]

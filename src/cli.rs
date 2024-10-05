@@ -1,9 +1,7 @@
-use crate::api::ApiState;
-use crate::config::{read_config, Config};
 use crate::{
-    api::base::{health, root},
-    api::download::download,
-    api::upload::upload,
+    api::root::static_handler,
+    api::{download::download, health::health, upload::upload, ApiState},
+    config::{read_config, Config},
     db::conn::establish_conn,
 };
 use anyhow::Error;
@@ -14,8 +12,7 @@ use axum::{
 };
 use log::info;
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 pub async fn run() -> Result<(), Error> {
     let conf = read_config()?;
@@ -29,8 +26,9 @@ async fn server_start(config: Config) -> Result<(), Error> {
 
     let server_conf = config.server.clone();
     let state = ApiState { db, config };
+
     let app = Router::new()
-        .route("/", get(root))
+        .fallback(static_handler)
         .route("/health", get(health))
         .route(
             "/dice/api/log",
