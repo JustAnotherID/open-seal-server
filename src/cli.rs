@@ -14,6 +14,7 @@ use axum::{
 };
 use log::info;
 use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 pub async fn run() -> Result<(), Error> {
@@ -37,7 +38,8 @@ async fn server_start(config: Config) -> Result<(), Error> {
         )
         .route("/dice/api/load_data", get(download))
         .with_state(state)
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .layer(CorsLayer::permissive());
     let listener = TcpListener::bind(format!("{}:{}", server_conf.host, server_conf.port)).await?;
     info!(
         "Starting seal story painter server, listening on {}:{}",
