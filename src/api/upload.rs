@@ -1,15 +1,13 @@
-use crate::{db::file_info::save_file_info, error::ApiError};
+use crate::{config::Config, db::file_info::save_file_info, error::ApiError};
 use anyhow::Error;
-use axum::{
-    extract::{Multipart, State},
-    Json,
-};
+use axum::{extract::Multipart, extract::State, Json};
 use flate2::bufread::ZlibDecoder;
 use sea_orm::DatabaseConnection;
 use std::{collections::HashMap, io::Read, str::from_utf8, string::String};
 
 pub async fn upload(
     State(db): State<DatabaseConnection>,
+    State(config): State<Config>,
     mut multipart: Multipart,
 ) -> Result<Json<HashMap<String, String>>, ApiError> {
     let mut name = "".to_string();
@@ -42,7 +40,7 @@ pub async fn upload(
                 url = write_log_file(&db, &name, &uniform_id, &data)
                     .await
                     .map_or(String::new(), |(key, secret)| {
-                        format!("http://localhost:3000?key={}#{}", key, secret)
+                        format!("{}?key={}#{}", config.server.domain, key, secret)
                     });
             }
             _ => break,

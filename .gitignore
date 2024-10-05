@@ -1,5 +1,7 @@
 /target
-db.sqlite
+
+data.db
+config.toml
 
 .idea
 !/.idea/**/Project.xml

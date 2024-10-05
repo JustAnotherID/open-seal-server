@@ -1,11 +1,15 @@
+use crate::config::DbConfig;
 use anyhow::Error;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::time::Duration;
 use tracing::log;
 
-pub async fn establish_conn() -> Result<DatabaseConnection, Error> {
-    let mut opt = ConnectOptions::new("postgres://postgres:postgres@localhost:5432/postgres");
+pub async fn establish_conn(conf: DbConfig) -> Result<DatabaseConnection, Error> {
+    let mut opt = match conf {
+        DbConfig::Sqlite { path } => ConnectOptions::new(format!("sqlite://{}?mode=rwc", path)),
+        DbConfig::Postgres { url } => ConnectOptions::new(url),
+    };
     opt = set_conn(opt);
     let db = Database::connect(opt)
         .await
