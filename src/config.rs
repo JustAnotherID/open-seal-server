@@ -8,12 +8,17 @@ use std::io::Write;
 pub(crate) struct Config {
     pub(crate) server: ServerConfig,
     pub(crate) database: DbConfig,
+    pub(crate) story_log: StoryLogConfig,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct ServerConfig {
     pub(crate) host: String,
     pub(crate) port: u16,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct StoryLogConfig {
     pub(crate) max_log_mb: usize,
     pub(crate) domain: String,
 }
@@ -48,11 +53,13 @@ fn setup() -> Result<Config, Error> {
         server: ServerConfig {
             host: "0.0.0.0".to_string(),
             port: 3212,
-            max_log_mb: 10,
-            domain: "http://localhost:3212".to_string(),
         },
         database: DbConfig::Sqlite {
             path: "data.db".to_string(),
+        },
+        story_log: StoryLogConfig {
+            max_log_mb: 10,
+            domain: "http://localhost:3212".to_string(),
         },
     }; // TODO interactive setup
     let data = toml::to_string(&conf)?;

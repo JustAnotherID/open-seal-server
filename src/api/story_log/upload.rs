@@ -40,7 +40,7 @@ pub async fn upload(
                 url = write_log_file(&db, &name, &uniform_id, &data)
                     .await
                     .map_or(String::new(), |(key, secret)| {
-                        format!("{}?key={}#{}", config.server.domain, key, secret)
+                        format!("{}?key={}#{}", config.story_log.domain, key, secret)
                     });
             }
             _ => break,

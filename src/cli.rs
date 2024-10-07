@@ -1,6 +1,10 @@
+use crate::api::root::not_found;
 use crate::{
-    api::root::static_handler,
-    api::{download::download, health::health, upload::upload, ApiState},
+    api::{
+        root::static_handler,
+        story_log::{download::download, health::health, upload::upload},
+        ApiState,
+    },
     config::{read_config, Config},
     db::conn::establish_conn,
 };
@@ -21,27 +25,26 @@ pub async fn run() -> Result<(), Error> {
 }
 
 async fn server_start(config: Config) -> Result<(), Error> {
+    let server_conf = config.server.clone();
     let db_config = config.database.clone();
     let db = establish_conn(db_config).await?;
 
-    let server_conf = config.server.clone();
+    let story_log_config = config.story_log.clone();
     let state = ApiState { db, config };
 
     let app = Router::new()
-        .fallback(static_handler)
         .route("/health", get(health))
+        // story log api
+        .fallback(static_handler) // fallback to painter page
         .route(
             "/dice/api/log",
-            put(upload).layer(DefaultBodyLimit::max(1024 * server_conf.max_log_mb)),
+            put(upload).layer(DefaultBodyLimit::max(1024 * story_log_config.max_log_mb)),
         )
         .route("/dice/api/load_data", get(download))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
     let listener = TcpListener::bind(format!("{}:{}", server_conf.host, server_conf.port)).await?;
-    info!(
-        "Starting seal story painter server, listening on {}:{}",
-        server_conf.host, server_conf.port
-    );
+    info!("listening on {}:{}", server_conf.host, server_conf.port);
     Ok(axum::serve(listener, app).await?)
 }

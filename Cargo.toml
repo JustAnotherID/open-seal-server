@@ -1,5 +1,5 @@
 [package]
-name = "seal-story-painter-backend"
+name = "open-seal-server"
 version = "0.1.0"
 authors = ["JustAnotherID <just-another-id@outlook.com>"]
 edition = "2021"
@@ -24,7 +24,7 @@ dialoguer = "^0.11.0"
 flate2 = { version = "1.0.34" }
 log = { version = "^0.4.22", features = ["serde"] }
 nid = { version = "^3.0.0", features = ["serde"] }
-rust-embed = { version = "^8.5.0" , features = ["compression", "debug-embed", "axum"]}
+rust-embed = { version = "^8.5.0", features = ["compression", "debug-embed", "axum"] }
 sea-orm = { version = "^1.0.1", features = [
     "macros",
     "runtime-tokio-rustls",

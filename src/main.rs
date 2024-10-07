@@ -1,9 +1,11 @@
 use anyhow::Error;
-use seal_story_painter_backend::cli;
+use log::info;
+use open_seal_server::cli;
 use tracing_subscriber::{filter::LevelFilter, fmt, fmt::time::OffsetTime, prelude::*, EnvFilter};
 
 fn main() -> Result<(), Error> {
     init_logger();
+    info!("Open Seal Server v{}", env!("CARGO_PKG_VERSION"));
     run()
 }
 
