@@ -1,9 +1,8 @@
-use crate::api::root::not_found;
 use crate::{
     api::{
-        root::static_handler,
-        story_log::{download::download, health::health, upload::upload},
-        ApiState,
+        health::health,
+        root::{not_found, static_handler},
+        store, story_log, ApiState,
     },
     config::{read_config, Config},
     db::conn::establish_conn,
@@ -11,7 +10,7 @@ use crate::{
 use anyhow::Error;
 use axum::{
     extract::DefaultBodyLimit,
-    routing::{get, put},
+    routing::{get, post, put},
     Router,
 };
 use log::info;
@@ -32,15 +31,27 @@ async fn server_start(config: Config) -> Result<(), Error> {
     let story_log_config = config.story_log.clone();
     let state = ApiState { db, config };
 
+    let store_router = Router::new()
+        .route("/info", get(store::info::info))
+        .route("/recommend", get(store::recommend::recommend))
+        .route("/page", get(store::page::page))
+        .route("/download/:key", get(store::download::download))
+        .route("/upload/info", get(store::upload::upload_info))
+        .route("/upload", post(store::upload::upload))
+        .route("/rating", put(store::rating::rating))
+        .fallback(not_found);
     let app = Router::new()
         .route("/health", get(health))
         // story log api
         .fallback(static_handler) // fallback to painter page
         .route(
             "/dice/api/log",
-            put(upload).layer(DefaultBodyLimit::max(1024 * story_log_config.max_log_mb)),
+            put(story_log::upload::upload)
+                .layer(DefaultBodyLimit::max(1024 * story_log_config.max_log_mb)),
         )
-        .route("/dice/api/load_data", get(download))
+        .route("/dice/api/load_data", get(story_log::download::download))
+        // store api
+        .nest("/dice/api/store", store_router)
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());

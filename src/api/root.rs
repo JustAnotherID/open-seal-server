@@ -38,6 +38,6 @@ async fn index_html() -> Response {
     }
 }
 
-async fn not_found() -> Response {
+pub(crate) async fn not_found() -> Response {
     (StatusCode::NOT_FOUND, "404").into_response()
 }
