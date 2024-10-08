@@ -57,3 +57,7 @@ semver = { version = "1.0.23", features = ["serde"] }
 
 [dev-dependencies]
 http-body-util = "^0.1.2"
+
+[profile.release]
+lto = true
+strip = true
