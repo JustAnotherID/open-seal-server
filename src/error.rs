@@ -6,15 +6,17 @@ use axum::{
 pub enum ApiError {
     Internal(anyhow::Error),
     Param(anyhow::Error),
+    NotFound(anyhow::Error),
 }
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         match self {
             ApiError::Internal(err) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, format!("{}", err)).into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
             }
-            ApiError::Param(err) => (StatusCode::BAD_REQUEST, format!("{}", err)).into_response(),
+            ApiError::Param(err) => (StatusCode::BAD_REQUEST, err.to_string()).into_response(),
+            ApiError::NotFound(err) => (StatusCode::NOT_FOUND, err.to_string()).into_response(),
         }
     }
 }
