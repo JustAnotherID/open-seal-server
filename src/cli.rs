@@ -1,5 +1,6 @@
 use crate::{
     api::{
+        core,
         health::health,
         root::{not_found, static_handler},
         store, story_log, ApiState,
@@ -15,7 +16,7 @@ use axum::{
 };
 use log::info;
 use tokio::net::TcpListener;
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
+use tower_http::{compression::CompressionLayer, cors::CorsLayer, trace::TraceLayer};
 
 pub async fn run() -> Result<(), Error> {
     let conf = read_config()?;
@@ -42,6 +43,12 @@ async fn server_start(config: Config) -> Result<(), Error> {
         .fallback(not_found);
     let app = Router::new()
         .route("/health", get(health))
+        // core api
+        .route("/dice/api/version", get(core::version::version))
+        .route(
+            "/dice/api/core/download/:target_file",
+            get(core::download::download),
+        )
         // story log api
         .fallback(static_handler) // fallback to painter page
         .route(
@@ -54,6 +61,13 @@ async fn server_start(config: Config) -> Result<(), Error> {
         .nest("/dice/api/store", store_router)
         .with_state(state)
         .layer(TraceLayer::new_for_http())
+        .layer(
+            CompressionLayer::new()
+                .br(true)
+                .deflate(true)
+                .gzip(true)
+                .zstd(true),
+        )
         .layer(CorsLayer::permissive());
     let listener = TcpListener::bind(format!("{}:{}", server_conf.host, server_conf.port)).await?;
     info!("listening on {}:{}", server_conf.host, server_conf.port);

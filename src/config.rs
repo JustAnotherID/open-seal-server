@@ -8,6 +8,7 @@ use std::io::Write;
 pub(crate) struct Config {
     pub(crate) server: ServerConfig,
     pub(crate) database: DbConfig,
+    pub(crate) core: CoreConfig,
     pub(crate) store: StoreConfig,
     pub(crate) story_log: StoryLogConfig,
 }
@@ -16,12 +17,14 @@ impl Config {
     pub(crate) fn new(
         server: ServerConfig,
         database: DbConfig,
+        core: CoreConfig,
         store: StoreConfig,
         story_log: StoryLogConfig,
     ) -> Self {
         Self {
             server,
             database,
+            core,
             store,
             story_log,
         }
@@ -32,13 +35,53 @@ impl Config {
 pub(crate) struct ServerConfig {
     pub(crate) host: String,
     pub(crate) port: u16,
+    pub(crate) domain: String,
 }
 
 impl ServerConfig {
-    pub(crate) fn new(host: &str, port: u16) -> Self {
+    pub(crate) fn new(host: &str, port: u16, domain: &str) -> Self {
         Self {
             host: host.to_string(),
             port,
+            domain: domain.to_string(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(tag = "type")]
+pub(crate) enum DbConfig {
+    #[serde(rename = "sqlite")]
+    Sqlite { path: String },
+
+    #[serde(rename = "postgres")]
+    Postgres { url: String },
+}
+
+impl DbConfig {
+    pub(crate) fn new_sqlite(path: &str) -> Self {
+        Self::Sqlite {
+            path: path.to_string(),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn new_postgres(url: &str) -> Self {
+        Self::Postgres {
+            url: url.to_string(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct CoreConfig {
+    pub(crate) file_dir: String,
+}
+
+impl CoreConfig {
+    pub(crate) fn new(file_dir: &str) -> Self {
+        Self {
+            file_dir: file_dir.to_string(),
         }
     }
 }
@@ -133,40 +176,11 @@ impl UploadFormElem {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct StoryLogConfig {
     pub(crate) max_log_mb: usize,
-    pub(crate) domain: String,
 }
 
 impl StoryLogConfig {
-    pub(crate) fn new(max_log_mb: usize, domain: &str) -> Self {
-        Self {
-            max_log_mb,
-            domain: domain.to_string(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(tag = "type")]
-pub(crate) enum DbConfig {
-    #[serde(rename = "sqlite")]
-    Sqlite { path: String },
-
-    #[serde(rename = "postgres")]
-    Postgres { url: String },
-}
-
-impl DbConfig {
-    pub(crate) fn new_sqlite(path: &str) -> Self {
-        Self::Sqlite {
-            path: path.to_string(),
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn new_postgres(url: &str) -> Self {
-        Self::Postgres {
-            url: url.to_string(),
-        }
+    pub(crate) fn new(max_log_mb: usize) -> Self {
+        Self { max_log_mb }
     }
 }
 
@@ -187,8 +201,9 @@ pub(crate) fn read_config() -> Result<Config, Error> {
 fn setup() -> Result<Config, Error> {
     let mut file = File::create("config.toml")?;
     let conf = Config::new(
-        ServerConfig::new("0.0.0.0", 3212),
+        ServerConfig::new("0.0.0.0", 3212, "http://localhost:3212"),
         DbConfig::new_sqlite("data.db"),
+        CoreConfig::new("core-files"),
         StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", ""),
         // .with_upload_form(vec![
         //     UploadFormElem::new("name", "名称", true),
@@ -200,7 +215,7 @@ fn setup() -> Result<Config, Error> {
         //     UploadFormElem::new("author", "作者", true),
         //     UploadFormElem::new("desc", "描述", true),
         // ]),
-        StoryLogConfig::new(10, "http://localhost:3212"),
+        StoryLogConfig::new(10),
     ); // TODO interactive setup
     let data = toml::to_string(&conf)?;
     file.write_all(data.as_bytes())?;

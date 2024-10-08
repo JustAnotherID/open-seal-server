@@ -2,6 +2,7 @@ use crate::config::Config;
 use axum::extract::FromRef;
 use sea_orm::DatabaseConnection;
 
+pub(crate) mod core;
 pub(crate) mod health;
 pub(crate) mod root;
 pub(crate) mod store;
