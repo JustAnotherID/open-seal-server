@@ -1,10 +1,9 @@
 use anyhow::{anyhow, Error};
 use base64::{prelude::BASE64_STANDARD, Engine};
 use entity::entities::{
-    file_info::{self, Model},
+    file_info::{ActiveModel, Column, Model},
     prelude::FileInfo,
 };
-use file_info::{ActiveModel, Column};
 use flate2::write::ZlibEncoder;
 use nid::{alphabet::Base36LowercaseAlphabet, Nanoid};
 use sea_orm::{

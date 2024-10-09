@@ -19,21 +19,41 @@ impl MigrationTrait for Migration {
                     .col(blob(FileInfo::Content))
                     .col(timestamp_with_time_zone(FileInfo::CreatedAt))
                     .col(timestamp_with_time_zone_null(FileInfo::UpdatedAt))
-                    .index(
-                        Index::create()
-                            .name("idx_name_uniform_id")
-                            .unique()
-                            .col(FileInfo::Name)
-                            .col(FileInfo::UniformId),
-                    )
-                    .index(Index::create().name("idx_key").unique().col(FileInfo::Key))
-                    .index(
-                        Index::create()
-                            .name("idx_key_secret")
-                            .unique()
-                            .col(FileInfo::Key)
-                            .col(FileInfo::Secret),
-                    )
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .if_not_exists()
+                    .table(FileInfo::Table)
+                    .name("idx_name_uniform_id")
+                    .unique()
+                    .col(FileInfo::Name)
+                    .col(FileInfo::UniformId)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .if_not_exists()
+                    .table(FileInfo::Table)
+                    .name("idx_key")
+                    .unique()
+                    .col(FileInfo::Key)
+                    .to_owned(),
+            )
+            .await?;
+        manager
+            .create_index(
+                Index::create()
+                    .if_not_exists()
+                    .table(FileInfo::Table)
+                    .name("idx_key_secret")
+                    .unique()
+                    .col(FileInfo::Key)
+                    .col(FileInfo::Secret)
                     .to_owned(),
             )
             .await

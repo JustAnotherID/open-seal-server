@@ -2,4 +2,7 @@
 
 pub mod prelude;
 
+pub mod extension;
+pub mod extension_tag;
+pub mod extension_tag_relation;
 pub mod file_info;

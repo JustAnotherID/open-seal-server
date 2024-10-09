@@ -49,12 +49,9 @@ impl ServerConfig {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub(crate) enum DbConfig {
-    #[serde(rename = "sqlite")]
     Sqlite { path: String },
-
-    #[serde(rename = "postgres")]
     Postgres { url: String },
 }
 

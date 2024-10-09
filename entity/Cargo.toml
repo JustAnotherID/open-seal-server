@@ -13,3 +13,5 @@ sea-orm = { version = "^1.0.1", features = [
     "with-json",
     "with-time",
 ] }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "^1.0.128", features = ["raw_value"] }

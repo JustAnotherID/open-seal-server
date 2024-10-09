@@ -2,6 +2,7 @@
 
 data.db
 config.toml
+/core-files
 
 .idea
 !/.idea/**/Project.xml
