@@ -1,14 +1,17 @@
 use crate::{
+    api::ApiState,
     api::{store::Extension, Response},
+    db::extension::{page_extensions, SortBy},
     db::{Page, Paging},
 };
-use axum::extract::Query;
+use axum::extract::{Query, State};
+use sea_orm::Order;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct QueryParams {
-    #[serde(flatten)]
+    #[serde(flatten, default)]
     pub(crate) paging: Paging,
 
     pub(crate) r#type: String,
@@ -22,6 +25,30 @@ pub(crate) struct QueryParams {
     pub(crate) order: Option<String>,
 }
 
-pub async fn page(Query(params): Query<QueryParams>) -> Response<Page<Extension>> {
-    todo!()
+pub async fn page(
+    Query(params): Query<QueryParams>,
+    State(state): State<ApiState>,
+) -> Response<Page<Extension>> {
+    if params.r#type.is_empty() || params.r#type != "plugin" && params.r#type != "deck" {
+        return Response::err("invalid type");
+    }
+    let result = page_extensions(
+        &state.db,
+        params.paging,
+        params.r#type,
+        params.author,
+        params.name,
+        params.sort_by.map(|v| match v.as_str() {
+            "updateTime" => SortBy::UpdateTime,
+            _ => SortBy::DownloadNum,
+        }),
+        params.order.map(|v| match v.as_str() {
+            order if order.to_lowercase() == "asc" => Order::Desc,
+            _ => Order::Asc,
+        }),
+    )
+    .await
+    .map(|page| page.map(|model| Extension::from(model.to_owned())));
+
+    Response::from(result)
 }

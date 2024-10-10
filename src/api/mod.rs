@@ -36,6 +36,18 @@ pub(crate) enum Response<T> {
     Err { err: String },
 }
 
+impl<T> Response<T> {
+    pub(crate) fn ok(data: T) -> Self {
+        Self::Ok { data }
+    }
+
+    pub(crate) fn err(err: impl ToString) -> Self {
+        Self::Err {
+            err: err.to_string(),
+        }
+    }
+}
+
 impl<T: Serialize> IntoResponse for Response<T> {
     fn into_response(self) -> axum::response::Response {
         match self {
@@ -49,6 +61,18 @@ impl<T: Serialize> IntoResponse for Response<T> {
                 "err": err,
             }))
             .into_response(),
+        }
+    }
+}
+
+impl<T, E> From<Result<T, E>> for Response<T>
+where
+    E: ToString,
+{
+    fn from(result: Result<T, E>) -> Self {
+        match result {
+            Ok(data) => Self::ok(data),
+            Err(err) => Self::err(err),
         }
     }
 }

@@ -1,3 +1,4 @@
+use entity::entities::extension;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -41,4 +42,65 @@ pub(crate) struct Extension {
     pub(crate) home_page: Option<String>,
     pub(crate) seal_version: Option<String>,
     pub(crate) dependencies: Option<HashMap<String, String>>,
+}
+
+impl From<extension::Model> for Extension {
+    fn from(model: extension::Model) -> Self {
+        let id = format!("@{}/{}@{}", model.namespace, model.key, model.version);
+        let tp = match model.r#type.as_str() {
+            "deck" => ExtType::Deck,
+            _ => ExtType::Plugin,
+        };
+        let authors = model
+            .authors
+            .as_array()
+            .unwrap()
+            .to_owned()
+            .iter()
+            .map(|v| v.to_string())
+            .collect();
+        let tags = model.tags.map(|v| {
+            v.as_array()
+                .unwrap()
+                .to_owned()
+                .iter()
+                .map(|v| v.to_string())
+                .collect()
+        });
+        let key = model.key;
+        let namespace = model.namespace;
+        let version = model.version;
+        let ext = model.ext;
+        let name = model.name;
+        let desc = model.desc;
+        let license = model.license;
+        let release_time = model.release_time as u64;
+        let update_time = model.update_time as u64;
+        let download_num = model.download_num as u64;
+        let download_url = "".to_string();
+        let hash = HashMap::new();
+        Self {
+            id,
+            key,
+            namespace,
+            version,
+            r#type: tp,
+            ext,
+            name,
+            authors,
+            desc,
+            license,
+            release_time,
+            update_time,
+            download_num,
+            download_url,
+            hash,
+            tags,
+            rate: None,
+            extra: None,
+            home_page: None,
+            seal_version: None,
+            dependencies: None,
+        }
+    }
 }
