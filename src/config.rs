@@ -92,16 +92,18 @@ pub(crate) struct StoreConfig {
     pub(crate) upload_notice: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) upload_form: Option<Vec<UploadFormElem>>,
+    pub(crate) extension_dir: String,
 }
 
 impl StoreConfig {
-    pub(crate) fn new(id: &str, name: &str, announcement: &str) -> Self {
+    pub(crate) fn new(id: &str, name: &str, announcement: &str, extension_dir: &str) -> Self {
         Self {
             id: id.to_string(),
             name: name.to_string(),
             announcement: announcement.to_string(),
             upload_notice: None,
             upload_form: None,
+            extension_dir: extension_dir.to_string(),
         }
     }
 
@@ -201,7 +203,7 @@ fn setup() -> Result<Config, Error> {
         ServerConfig::new("0.0.0.0", 3212, "http://localhost:3212"),
         DbConfig::new_sqlite("data.db"),
         CoreConfig::new("core-files"),
-        StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", ""),
+        StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", "", "extensions"),
         // .with_upload_form(vec![
         //     UploadFormElem::new("name", "名称", true),
         //     UploadFormElem::new("type", "类型", true).with_options(vec![

@@ -11,21 +11,24 @@ members = [".", "entity", "migration"]
 entity = { path = "entity" }
 migration = { path = "migration" }
 
-anyhow = "^1.0.89"
+anyhow = "^1.0.90"
 axum = { version = "^0.7.7", features = ["http2", "multipart"] }
 base64 = "^0.22.1"
-clap = { version = "^4.5.19", features = ["derive"] }
+clap = { version = "^4.5.20", features = ["derive"] }
 console = { version = "^0.15.8", features = ["windows-console-colors"] }
 dialoguer = "^0.11.0"
 flate2 = { version = "1.0.34" }
+http-body-util = "0.1.2"
 log = { version = "^0.4.22", features = ["serde"] }
+mime_guess = "2.0.5"
 nid = { version = "^3.0.0", features = ["serde"] }
+regex = "1.11.0"
 rust-embed = { version = "^8.5.0", features = [
     "compression",
     "debug-embed",
     "axum",
 ] }
-sea-orm = { version = "^1.0.1", features = [
+sea-orm = { version = "^1.1.0", features = [
     "macros",
     "runtime-tokio-rustls",
     "sqlx-postgres",
@@ -33,8 +36,9 @@ sea-orm = { version = "^1.0.1", features = [
     "with-json",
     "with-time",
 ] }
+semver = { version = "1.0.23", features = ["serde"] }
 serde = { version = "^1.0.210", features = ["derive"] }
-serde_json = { version = "^1.0.128", features = ["raw_value"] }
+serde_json = { version = "^1.0.131", features = ["raw_value"] }
 time = { version = "^0.3.36", features = ["serde-human-readable"] }
 toml = "^0.8.19"
 tokio = { version = "^1.40.0", features = ["full"] }
@@ -51,9 +55,6 @@ tracing-subscriber = { version = "^0.3.18", features = [
     "env-filter",
     "local-time",
 ] }
-mime_guess = "2.0.5"
-http-body-util = "0.1.2"
-semver = { version = "1.0.23", features = ["serde"] }
 
 [dev-dependencies]
 http-body-util = "^0.1.2"
