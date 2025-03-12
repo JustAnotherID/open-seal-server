@@ -73,12 +73,14 @@ impl DbConfig {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct CoreConfig {
     pub(crate) file_dir: String,
+    pub(crate) news_html: String,
 }
 
 impl CoreConfig {
-    pub(crate) fn new(file_dir: &str) -> Self {
+    pub(crate) fn new(file_dir: &str, news_html: &str) -> Self {
         Self {
             file_dir: file_dir.to_string(),
+            news_html: news_html.to_string(),
         }
     }
 }
@@ -202,7 +204,7 @@ fn setup() -> Result<Config, Error> {
     let conf = Config::new(
         ServerConfig::new("0.0.0.0", 3210, "http://localhost:3212"),
         DbConfig::new_sqlite("data.db"),
-        CoreConfig::new("core-files"),
+        CoreConfig::new("core-files", "<div>Hello World!</div>"),
         StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", "", "extensions"),
         // .with_upload_form(vec![
         //     UploadFormElem::new("name", "名称", true),

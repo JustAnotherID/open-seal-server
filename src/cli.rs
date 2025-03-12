@@ -45,6 +45,7 @@ async fn server_start(config: Config) -> Result<(), Error> {
         .route("/health", get(health))
         // core api
         .route("/dice/api/version", get(core::version::version))
+        .route("/dice/api/news", get(core::news::news))
         .route(
             "/dice/api/core/download/{target_file}",
             get(core::download::download),
