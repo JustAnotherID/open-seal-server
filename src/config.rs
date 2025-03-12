@@ -200,7 +200,7 @@ pub(crate) fn read_config() -> Result<Config, Error> {
 fn setup() -> Result<Config, Error> {
     let mut file = File::create("config.toml")?;
     let conf = Config::new(
-        ServerConfig::new("0.0.0.0", 3212, "http://localhost:3212"),
+        ServerConfig::new("0.0.0.0", 3210, "http://localhost:3212"),
         DbConfig::new_sqlite("data.db"),
         CoreConfig::new("core-files"),
         StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", "", "extensions"),

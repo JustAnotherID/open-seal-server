@@ -19,9 +19,9 @@
 
 ### 跑团日志
 
-在海豹核心的「高级设置」中配置「自定义后端 URL」为该跑团日志服务的地址，如 `http://localhost:3212/dice/api/log` 。
+在海豹核心的「高级设置」中配置「自定义后端 URL」为该跑团日志服务的地址，如 `http://localhost:3210/dice/api/log` 。
 
-访问 `http://localhost:3212` 即可进入对应的染色器页面。
+访问 `http://localhost:3210` 即可进入对应的染色器页面。
 
 ## 其他说明
 

@@ -18,7 +18,7 @@ pub(crate) struct VersionInfo {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "lowercase")]
 pub(crate) enum Channel {
     Stable,
     Beta,

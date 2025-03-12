@@ -36,7 +36,7 @@ async fn server_start(config: Config) -> Result<(), Error> {
         .route("/info", get(store::info::info))
         .route("/recommend", get(store::recommend::recommend))
         .route("/page", get(store::page::page))
-        .route("/download/:key", get(store::download::download))
+        .route("/download/{key}", get(store::download::download))
         .route("/upload/info", get(store::upload::upload_info))
         .route("/upload", post(store::upload::upload))
         .route("/rating", put(store::rating::rating))
@@ -46,7 +46,7 @@ async fn server_start(config: Config) -> Result<(), Error> {
         // core api
         .route("/dice/api/version", get(core::version::version))
         .route(
-            "/dice/api/core/download/:target_file",
+            "/dice/api/core/download/{target_file}",
             get(core::download::download),
         )
         // story log api
