@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Error};
 use base64::{prelude::BASE64_STANDARD, Engine};
+use chrono::Utc;
 use entity::entities::{
     file_info::{ActiveModel, Column, Model},
     prelude::FileInfo,
@@ -26,7 +27,7 @@ pub async fn save_file_info(
     uniform_id: &str,
     content: Vec<u8>,
 ) -> Result<(String, String), Error> {
-    let now = time::OffsetDateTime::now_utc();
+    let now = Utc::now().fixed_offset();
     let exists: Option<Model> = FileInfo::find()
         .filter(Column::Name.eq(name))
         .filter(Column::UniformId.eq(uniform_id))

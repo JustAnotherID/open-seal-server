@@ -15,8 +15,8 @@ pub struct Model {
     pub secret: String,
     #[sea_orm(column_type = "Blob")]
     pub content: Vec<u8>,
-    pub created_at: TimeDateTimeWithTimeZone,
-    pub updated_at: Option<TimeDateTimeWithTimeZone>,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

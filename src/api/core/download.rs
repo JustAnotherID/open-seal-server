@@ -1,43 +1,47 @@
 use crate::config::Config;
 use axum::{
-    body::Body,
     extract::{Path, State},
-    http::{header, StatusCode},
+    http::{
+        header::{self},
+        StatusCode,
+    },
     response::IntoResponse,
 };
-use tokio_util::io::ReaderStream;
+use axum_extra::{headers::Range, TypedHeader};
+use axum_range::{KnownSize, Ranged};
+use header::{HeaderValue, CONTENT_DISPOSITION, CONTENT_TYPE};
 
 pub(crate) async fn download(
     Path(target_file): Path<String>,
     State(config): State<Config>,
+    range: Option<TypedHeader<Range>>,
 ) -> impl IntoResponse {
-    if target_file.is_empty() {
-        return Err((StatusCode::BAD_REQUEST, "target file is empty").into_response());
-    } else if target_file.contains("/") {
-        return Err((StatusCode::BAD_REQUEST, "illegal target file").into_response());
+    let path = std::path::Path::new(&target_file);
+    if path.parent() != Some(std::path::Path::new("")) || path.is_absolute() {
+        return Err((StatusCode::BAD_REQUEST, "invalid file".to_string()).into_response());
     }
 
     let core_config = config.core;
     let target = std::path::Path::new(&core_config.file_dir).join(&target_file);
-    let file = match tokio::fs::File::open(target).await {
-        Ok(file) => file,
-        Err(_) => {
-            return Err((
-                StatusCode::NOT_FOUND,
-                format!("target file \"{}\" not found", target_file),
-            )
-                .into_response())
-        }
-    };
-    let stream = ReaderStream::new(file);
-    let body = Body::from_stream(stream);
+    let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("file");
 
-    let headers = [
-        (header::CONTENT_TYPE, "application/octet-stream".to_string()),
-        (
-            header::CONTENT_DISPOSITION,
-            format!("attachment; filename=\"{}\"", target_file),
-        ),
-    ];
-    Ok((headers, body))
+    let mut headers = header::HeaderMap::new();
+    headers.insert(
+        CONTENT_TYPE,
+        HeaderValue::from_static("application/octet-stream"),
+    );
+    headers.insert(
+        CONTENT_DISPOSITION,
+        HeaderValue::try_from(format!("attachment; filename={}", filename))
+            .unwrap_or_else(|_| HeaderValue::from_static("attachment; filename=unknown")),
+    );
+
+    let file = tokio::fs::File::open(target).await.unwrap();
+    let body = match KnownSize::file(file).await {
+        Ok(body) => body,
+        Err(_) => return Err((StatusCode::INTERNAL_SERVER_ERROR,).into_response()),
+    };
+
+    let ranged = Ranged::new(range.map(|h| h.0), body);
+    Ok((headers, ranged))
 }

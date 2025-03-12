@@ -30,3 +30,9 @@
 暂时将 [染色器前端](https://github.com/sealdice/story-painter) 对应的构建产物，直接放在了本项目的 `static` 中，后期考虑自动化构建。
 
 对染色器前端代码有微调，修改了原代码中硬编码的后端地址。
+
+### 2. 开发环境搭建
+
+```bash
+sea-orm-cli generate entity -u sqlite://data.db -o entity/src/entities --date-time-crate chrono --with-serde both
+```

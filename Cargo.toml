@@ -13,7 +13,10 @@ migration = { path = "migration" }
 
 anyhow = "^1.0.97"
 axum = { version = "^0.8.1", features = ["http2", "multipart"] }
+axum-range = "^0.5.0"
+axum-extra = "^0.10.0"
 base64 = "^0.22.1"
+chrono = { version = "^0.4.40" , features = ["serde"]}
 clap = { version = "^4.5.32", features = ["derive"] }
 console = { version = "^0.15.11", features = ["windows-console-colors"] }
 dialoguer = "^0.11.0"
@@ -34,12 +37,11 @@ sea-orm = { version = "^1.1.1", features = [
     "sqlx-postgres",
     "sqlx-sqlite",
     "with-json",
-    "with-time",
+    "with-chrono"
 ] }
 semver = { version = "^1.0.26", features = ["serde"] }
 serde = { version = "^1.0.219", features = ["derive"] }
 serde_json = { version = "^1.0.140", features = ["raw_value"] }
-time = { version = "^0.3.39", features = ["serde-human-readable"] }
 toml = "^0.8.20"
 tokio = { version = "^1.44.0", features = ["full"] }
 tokio-util = { version = "^0.7.13", features = ["io-util"] }

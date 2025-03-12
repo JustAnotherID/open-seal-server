@@ -28,8 +28,8 @@ pub struct Model {
     pub home_page: Option<String>,
     pub seal_version: Option<String>,
     pub dependencies: Option<Json>,
-    pub created_at: TimeDateTimeWithTimeZone,
-    pub updated_at: Option<TimeDateTimeWithTimeZone>,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
