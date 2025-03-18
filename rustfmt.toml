@@ -1,0 +1,10 @@
+edition = "2024"
+
+# Imports
+imports_granularity = "Crate"
+
+# Consistency
+newline_style = "Unix"
+
+# Misc
+use_try_shorthand = true
