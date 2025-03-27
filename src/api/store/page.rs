@@ -1,8 +1,9 @@
 use crate::{
-    api::ApiState,
-    api::{store::Extension, Response},
-    db::extension::{page_extensions, SortBy},
-    db::{Page, Paging},
+    api::{store, ApiState, Response},
+    service::{
+        extension::{Extension, SortBy},
+        Page, Paging,
+    },
 };
 use axum::extract::{Query, State};
 use sea_orm::Order;
@@ -28,11 +29,11 @@ pub(crate) struct QueryParams {
 pub async fn page(
     Query(params): Query<QueryParams>,
     State(state): State<ApiState>,
-) -> Response<Page<Extension>> {
+) -> Response<Page<store::Extension>> {
     if params.r#type.is_empty() || params.r#type != "plugin" && params.r#type != "deck" {
         return Response::err("invalid type");
     }
-    let result = page_extensions(
+    let result = Extension::page_extensions(
         &state.db,
         params.paging,
         params.r#type,
@@ -48,7 +49,7 @@ pub async fn page(
         }),
     )
     .await
-    .map(|page| page.map(|model| Extension::from(model.to_owned())));
+    .map(|page| page.map(store::Extension::from));
 
     Response::from(result)
 }

@@ -56,14 +56,14 @@ impl From<extension::Model> for Extension {
             .as_array()
             .unwrap()
             .to_owned()
-            .iter()
+            .into_iter()
             .map(|v| v.to_string())
             .collect();
         let tags = model.tags.map(|v| {
             v.as_array()
                 .unwrap()
                 .to_owned()
-                .iter()
+                .into_iter()
                 .map(|v| v.to_string())
                 .collect()
         });

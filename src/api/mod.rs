@@ -1,13 +1,12 @@
 use crate::config::Config;
-use axum::extract::FromRef;
-use axum::response::IntoResponse;
-use axum::Json;
+use axum::{extract::FromRef, response::IntoResponse, Json};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 pub(crate) mod core;
 pub(crate) mod health;
+pub(crate) mod public_dice;
 pub(crate) mod root;
 pub(crate) mod store;
 pub(crate) mod story_log;

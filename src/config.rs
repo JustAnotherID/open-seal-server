@@ -1,14 +1,17 @@
 use anyhow::Error;
 use log::info;
 use serde::{Deserialize, Serialize};
-use std::fs::{read_to_string, File};
-use std::io::Write;
+use std::{
+    fs::{read_to_string, File},
+    io::Write,
+};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Config {
     pub(crate) server: ServerConfig,
     pub(crate) database: DbConfig,
     pub(crate) core: CoreConfig,
+    pub(crate) public_dice: PublicDiceConfig,
     pub(crate) store: StoreConfig,
     pub(crate) story_log: StoryLogConfig,
 }
@@ -18,6 +21,7 @@ impl Config {
         server: ServerConfig,
         database: DbConfig,
         core: CoreConfig,
+        public_dice: PublicDiceConfig,
         store: StoreConfig,
         story_log: StoryLogConfig,
     ) -> Self {
@@ -25,6 +29,7 @@ impl Config {
             server,
             database,
             core,
+            public_dice,
             store,
             story_log,
         }
@@ -81,6 +86,19 @@ impl CoreConfig {
         Self {
             file_dir: file_dir.to_string(),
             news_html: news_html.to_string(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct PublicDiceConfig {
+    dice_public_key: String,
+}
+
+impl PublicDiceConfig {
+    pub(crate) fn new(dice_public_key: &str) -> Self {
+        Self {
+            dice_public_key: dice_public_key.to_string(),
         }
     }
 }
@@ -202,10 +220,11 @@ pub(crate) fn read_config() -> Result<Config, Error> {
 fn setup() -> Result<Config, Error> {
     let mut file = File::create("config.toml")?;
     let conf = Config::new(
-        ServerConfig::new("0.0.0.0", 3210, "http://localhost:3212"),
+        ServerConfig::new("0.0.0.0", 3210, "http://localhost:3210"),
         DbConfig::new_sqlite("data.db"),
         CoreConfig::new("core-files", "<div>Hello World!</div>"),
-        StoreConfig::new("seal-store:test", "海豹扩展商店[测试]", "", "extensions"),
+        PublicDiceConfig::new("<Dice Public Key>"),
+        StoreConfig::new("seal-store:test", "海豹扩展商店 [测试]", "", "extensions"),
         // .with_upload_form(vec![
         //     UploadFormElem::new("name", "名称", true),
         //     UploadFormElem::new("type", "类型", true).with_options(vec![

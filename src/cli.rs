@@ -2,11 +2,12 @@ use crate::{
     api::{
         core,
         health::health,
+        public_dice,
         root::{not_found, static_handler},
         store, story_log, ApiState,
     },
     config::{read_config, Config},
-    db::conn::establish_conn,
+    service::conn::establish_conn,
 };
 use anyhow::Error;
 use axum::{
@@ -32,6 +33,15 @@ async fn server_start(config: Config) -> Result<(), Error> {
     let story_log_config = config.story_log.clone();
     let state = ApiState { db, config };
 
+    let public_dice_router = Router::new()
+        .route("/list", get(public_dice::list::list))
+        .route("/register", post(public_dice::register::register_or_update))
+        .route(
+            "/endpoint-update",
+            post(public_dice::endpoint_update::endpoint_update),
+        )
+        .route("/tick-update", post(public_dice::tick_update::tick_update))
+        .fallback(not_found);
     let store_router = Router::new()
         .route("/info", get(store::info::info))
         .route("/recommend", get(store::recommend::recommend))
@@ -58,6 +68,8 @@ async fn server_start(config: Config) -> Result<(), Error> {
                 .layer(DefaultBodyLimit::max(1024 * story_log_config.max_log_mb)),
         )
         .route("/dice/api/load_data", get(story_log::download::download))
+        // public dice api
+        .nest("/dice/api/public-dice", public_dice_router)
         // store api
         .nest("/dice/api/store", store_router)
         .with_state(state)

@@ -1,7 +1,15 @@
 use anyhow::Error;
 use log::info;
 use open_seal_server::cli;
-use tracing_subscriber::{filter::LevelFilter, fmt, fmt::time::OffsetTime, prelude::*, EnvFilter};
+use tracing_subscriber::{
+    filter::LevelFilter,
+    fmt::{
+        time::OffsetTime,
+        {self},
+    },
+    prelude::*,
+    EnvFilter,
+};
 
 fn main() -> Result<(), Error> {
     init_logger();

@@ -5,7 +5,7 @@ use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::time::Duration;
 use tracing::log;
 
-pub async fn establish_conn(conf: DbConfig) -> Result<DatabaseConnection, Error> {
+pub(crate) async fn establish_conn(conf: DbConfig) -> Result<DatabaseConnection, Error> {
     let mut opt = match conf {
         DbConfig::Sqlite { path } => ConnectOptions::new(format!("sqlite://{}?mode=rwc", path)),
         DbConfig::Postgres { url } => ConnectOptions::new(url),
@@ -20,7 +20,7 @@ pub async fn establish_conn(conf: DbConfig) -> Result<DatabaseConnection, Error>
     Ok(db)
 }
 
-pub fn set_conn(mut opt: ConnectOptions) -> ConnectOptions {
+pub(crate) fn set_conn(mut opt: ConnectOptions) -> ConnectOptions {
     opt.max_connections(100)
         .min_connections(5)
         .connect_timeout(Duration::from_secs(8))
@@ -31,4 +31,13 @@ pub fn set_conn(mut opt: ConnectOptions) -> ConnectOptions {
         .sqlx_logging_level(log::LevelFilter::Debug)
         .set_schema_search_path("public");
     opt
+}
+
+#[cfg(test)]
+pub(crate) async fn build_test_db() -> DatabaseConnection {
+    let mut opt = ConnectOptions::new("sqlite::memory:");
+    opt = set_conn(opt);
+    let db = Database::connect(opt).await.unwrap();
+    Migrator::fresh(&db).await.unwrap();
+    db
 }

@@ -9,7 +9,10 @@
 
 - [x] 分发更新：提供对海豹核心本体、更新器、内置客户端等的下载。
 - [x] 跑团日志：接收上传的日志文件，并提供对应的染色器页面。
-- [ ] 扩展商店：自部署商店源，支持扩展内容（插件、牌堆）下载。
+- [x] 公骰：支持注册和上报公骰信息。
+- [ ] ~~扩展商店：自部署商店源，支持扩展内容（插件、牌堆）下载。~~
+- [ ] 云黑：支持上报和获取黑名单记录。
+- [ ] 管理后台：进行后台的配置和管理。
 
 ## 配置
 
@@ -34,5 +37,7 @@
 ### 2. 开发环境搭建
 
 ```bash
+sea-orm-cli migrate generate <table_name>
+DATABASE_URL=sqlite://data.db sea-orm-cli migrate up
 sea-orm-cli generate entity -u sqlite://data.db -o entity/src/entities --date-time-crate chrono --with-serde both
 ```

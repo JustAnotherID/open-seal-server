@@ -5,9 +5,7 @@ pub async fn health() -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use axum::http::Request;
-    use axum::routing::get;
-    use axum::Router;
+    use axum::{http::Request, routing::get, Router};
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 

@@ -1,6 +1,6 @@
 use crate::{
-    db::file_info::{find_file_info, FileInfoDTO},
     error::ApiError,
+    service::file_info::{FileInfo, FileInfoDTO},
 };
 use axum::{
     extract::{Query, State},
@@ -22,7 +22,7 @@ pub async fn download(
     if params.key.is_empty() || params.password.is_empty() {
         return Err(ApiError::Param(anyhow::anyhow!("key or password is empty")));
     }
-    match find_file_info(&db, &params.key, &params.password).await {
+    match FileInfo::find_file_info(&db, &params.key, &params.password).await {
         Ok(info) => Ok(Json(info)),
         Err(err) => Err(ApiError::NotFound(err)),
     }

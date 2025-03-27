@@ -1,6 +1,9 @@
-use crate::{config::Config, db::file_info::save_file_info, error::ApiError};
+use crate::{config::Config, error::ApiError, service::file_info::FileInfo};
 use anyhow::Error;
-use axum::{extract::Multipart, extract::State, Json};
+use axum::{
+    extract::{Multipart, State},
+    Json,
+};
 use flate2::bufread::ZlibDecoder;
 use sea_orm::DatabaseConnection;
 use std::{collections::HashMap, io::Read, str::from_utf8, string::String};
@@ -46,7 +49,7 @@ pub async fn upload(
             _ => break,
         }
     }
-    let res: HashMap<String, String> = [("url".to_string(), url)].iter().cloned().collect();
+    let res: HashMap<String, String> = [("url".to_string(), url)].into_iter().collect();
     Ok(Json(res))
 }
 
@@ -59,7 +62,7 @@ async fn write_log_file(
     let mut zlib = ZlibDecoder::new(compressed_data);
     let mut buf = Vec::new();
     zlib.read_to_end(&mut buf).expect("zlib decode failed");
-    let (key, secret) = save_file_info(db, name, uniform_id, buf)
+    let (key, secret) = FileInfo::save_file_info(db, name, uniform_id, buf)
         .await
         .expect("save file info failed");
 

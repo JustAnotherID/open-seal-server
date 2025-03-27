@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 pub(crate) mod conn;
+pub(crate) mod dice_endpoint;
+pub(crate) mod dice_info;
 pub(crate) mod extension;
 pub(crate) mod file_info;
 
@@ -60,11 +62,11 @@ impl<T> Page<T> {
         }
     }
 
-    pub(crate) fn map<U>(self, f: impl FnMut(&T) -> U + Sized) -> Page<U> {
+    pub(crate) fn map<U>(self, f: impl FnMut(T) -> U + Sized) -> Page<U> {
         Page::new(
             self.page_num,
             self.page_size,
-            self.data.iter().map(f).collect(),
+            self.data.into_iter().map(f).collect(),
             self.next,
         )
     }
