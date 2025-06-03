@@ -1,11 +1,11 @@
 [package]
 name = "entity"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "^1.40.0", features = ["full"] }
-sea-orm = { version = "^1.0.1", features = [
+tokio = { version = "^1.45.1", features = ["full"] }
+sea-orm = { version = "^1.2.0-rc.1", features = [
     "macros",
     "runtime-tokio-rustls",
     "sqlx-postgres",
@@ -14,4 +14,4 @@ sea-orm = { version = "^1.0.1", features = [
     "with-time",
 ] }
 serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "^1.0.128", features = ["raw_value"] }
+serde_json = { version = "^1.0.140", features = ["raw_value"] }
